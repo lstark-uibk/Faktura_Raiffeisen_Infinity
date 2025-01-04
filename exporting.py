@@ -39,7 +39,7 @@ def produce_sepa_export_dfs(invoices_selected_persons,mandates,creditor_ID):
             doublesprocess["Final"].append(finalsum)
 
 
-    def create_one_line_debit(invoicelistline,creditor_ID,mandates,type = debit):
+    def create_one_line_debit(invoicelistline,mandates,type = debit):
         print(invoicelistline["Empfänger Name"])
         columns_debit_export = ['Fälligkeitsdatum', 'Zahlungspflichtiger Name',
        'Zahlungspflichtiger Adresse', 'Zahlungspflichtiger Ort',
@@ -66,7 +66,6 @@ def produce_sepa_export_dfs(invoices_selected_persons,mandates,creditor_ID):
                 "Auftraggeber IBAN": "Ersteller IBAN"
             }
             exportline["Mandatsreferenz"] = f"{invoicelistline['Empfänger Mitgliedsnummer']:03}"
-            exportline["Creditor ID"] = creditor_ID
 
 
             mandateline = mandates.data[(mandates.data["Vorname"] == invoicelistline["Empfänger Vorame"])]
@@ -76,6 +75,8 @@ def produce_sepa_export_dfs(invoices_selected_persons,mandates,creditor_ID):
             if mandateline.size > 0:
                 exportline["Mandatsausstellungsdatum"] = mandateline["Mandatsausstellungsdatum"].iloc[0].strftime("%d.%m.%Y")
                 exportline["Firmenlastschrift"] = mandateline["Firmenlastschrift"].iloc[0]
+                exportline["Creditor ID"] = mandateline["Creditor ID"].iloc[0]
+
             else:
                 exportline["Creditor ID"] = 0
                 matchingmandate = False
@@ -103,7 +104,7 @@ def produce_sepa_export_dfs(invoices_selected_persons,mandates,creditor_ID):
             return y[1], y[2]
 
         year, quartal = get_quartal_out_of_str(invoicelistline["Abrechnung"])
-        exportline["Zahlungsreferenz/Verwendungszweck"] = f"Gemeinwohlenergie Rechung {year} Quartal {quartal}"
+        exportline["Zahlungsreferenz/Verwendungszweck"] = f"{invoicelistline['Ersteller Name']} Rechnung {year} Quartal {quartal} "
         if type == "debit":
             return exportline, matchingmandate
         else:
@@ -113,7 +114,7 @@ def produce_sepa_export_dfs(invoices_selected_persons,mandates,creditor_ID):
     serieslist = []
     missingmandates = []
     for index, line in debit.iterrows():
-        exportline,matchingmandate = create_one_line_debit(line,creditor_ID,mandates,type="debit")
+        exportline,matchingmandate = create_one_line_debit(line,mandates,type="debit")
         if exportline is not None:
             serieslist.append(exportline)
             if not matchingmandate:
