@@ -9,3 +9,6 @@ Workflow:
 3. Importiere beide dateien in Faktura_Raiffeisen_Infinity Programm
 4. Exportiere die Rechnungsdaten für Raiffeisen Infinity
 5. Importiere diese Datei in  Raiffeisen Infinity unter Aufträge -> Import
+
+Das Programm kommt bald als downloadbare .exe Datei
+
