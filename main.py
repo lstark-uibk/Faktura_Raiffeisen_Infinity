@@ -1,22 +1,14 @@
-from time import sleep
-
-from matplotlib.pyplot import title
-
 from nc_py_api import Nextcloud
 import pandas as pd
-import os
 from subwindows import LoginPrompt, Subwindow, MailSelection
-from PyQt5.QtCore import *
 from PyQt5 import QtWidgets, QtGui, QtCore
 import sys
 from PyQt5.QtWidgets import QLabel, QFileDialog, QMessageBox, QGridLayout, QTableWidget, QTableWidgetItem, QListWidget, QWidget, QListWidgetItem, QCheckBox, QListWidgetItem, QPushButton, QVBoxLayout
 from importing import mandates,invoices,emails, newmember, load_filepath
 from exporting import produce_sepa_export_dfs
 from PyQt5.QtWidgets import QHBoxLayout
-import datetime as dt
-import imaplib
-import email
-from email.header import decode_header
+
+
 
 
 
@@ -48,31 +40,6 @@ class TableView(QtWidgets.QTableWidget):
         self.setHorizontalHeaderLabels(horHeaders)
 
 
-# class ImportDialog(QtWidgets.QDialog):
-#     def __init__(self,mainwind):
-#         super().__init__(mainwind)
-#
-#         self.setWindowTitle("Import")
-#
-#         layout = QtWidgets.QVBoxLayout()
-#         importvariables = ["Rechnungsdaten aus EEG Faktura","Daten über Mandate","Vorlage Rechnungen","Vorlage Infinity Export"]
-#         buttons = [0]*len(importvariables)
-#         okbutton = QtWidgets.QPushButton("OK")
-#         okbutton.pressed.connect(self.accept)
-#         layouts = [0]*len(importvariables)
-#         for i,importvariable in enumerate(importvariables):
-#             layouts[i] = QtWidgets.QHBoxLayout()
-#             layouts[i].addWidget(QtWidgets.QLabel(importvariable))
-#             buttons[i] = QtWidgets.QPushButton("Laden")
-#             layouts[i].addWidget(buttons[i])
-#             layout.addLayout(layouts[i])
-#         layout.addWidget(okbutton)
-#         self.setLayout(layout)
-#         def sel_filepath_and_import():
-#             dialog = QFileDialog()
-#             foo_dir = dialog.getExistingDirectory(self, 'Select an awesome directory')
-#         buttons[0].pressed.connect()
-
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self, *args, **kwargs):
         super(MainWindow, self).__init__(*args, **kwargs)
@@ -82,25 +49,15 @@ class MainWindow(QtWidgets.QMainWindow):
         self.move(20, 20)
         self.second_window = None
         self.exportwindow = None
-        self.home_directory = "/home/leander/gei"
-        self.loaded_filepaths = pd.DataFrame({"Daten":["Mandate","Rechnungsdaten","Vorlage EEG Faktura Stammdaten Import",],
-                                  "Speicherort":["","",""],
+        self.loaded_filepaths = pd.DataFrame({"Daten":["Mandate","Rechnungsdaten"],
+                                  "Speicherort":["",""],
 
                                               })
         # promptwindows
         self.loginprompt = None
         self.mailselectionprompt = None
-        #nc credits
-        self.nc_auth_user = ''
-        self.nc_auth_pass = ''
-        self.nc_url = 'https://cloud.gemeinwohlenergie-innsbruck.at'
-        self.nc_mandatefilepath = "Gemeinwohlenergie/Rechnungswesen, IT/Abrechnung Faktura/SEPA Lastschriftmandate/lastschriftmandate.xlsx"
-        #email data
-        self.imap_server = "mail.your-server.de"
-        self.nc_faktura_export_template_fp = "Gemeinwohlenergie/Mitgliederverwaltung/Faktura Mitgliederstammdaten Upload Template/241206-vorlage-import-stammdaten_ls.xlsx"
 
-        self.creditor_ID = "AT94ZZZ00000079821"
-        self.GEI_gemeinschafts_ID = "ATCC9999DYNAMCC100438000000000249"
+        self.creditor_ID = ""
         self.mandatesdata_loaded = False
         self.invoicesdata_loaded = False
         self.init_Ui()
@@ -125,17 +82,6 @@ class MainWindow(QtWidgets.QMainWindow):
             quit.setShortcut("Alt+F4")
             quit.triggered.connect(lambda: sys.exit(0))
             self.actionFile.addAction(quit)
-
-        self.menubardata_New_member= self.init_menubardata_new_member()
-        if self.menubardata_New_member:
-            self.actionFile = menubar.addMenu("Neues Mitglied onbording")
-            for menuline in self.menubardata_New_member:
-                action = QtWidgets.QAction(menuline[0], self)
-                action.triggered.connect(menuline[2])
-                if menuline[1]:
-                    action.setShortcut(menuline[1])
-                self.actionFile.addAction(action)
-
 
 
         self.overallverticallayout.addWidget(menubar)
@@ -201,33 +147,8 @@ class MainWindow(QtWidgets.QMainWindow):
             filepath=""
             if not filepath:
                 print("Import mandates")
-                dlg = QMessageBox(self)
-                questiontext = f"Ich kann die Mandate von folgendem Pfad in nextcloud herunterladen:"
-                questiontext += f"\n\n{self.nc_mandatefilepath}"
-                questiontext += "\n\nSoll ich es von diesem Pfad herunterladen, oder willst du lokal eine Datei von deinem Computer auswählen?"
-                dlg.setText(questiontext)
-                dlg.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
-                prompt = dlg.exec()
-
-
-                if prompt == QMessageBox.Yes:
-                    def try_logging_in_f(user,pw):
-                        print(f"try logging in nextcloud with user: {user} und pw: {pw}")
-                        # nextcloud_url = 'https://cloud.gemeinwohlenergie-innsbruck.at'
-                        nc_instance = Nextcloud(nextcloud_url=self.nc_url, nc_auth_user=user,
-                                                nc_auth_pass=pw)
-                        # self.nc_instance = Nextcloud(nextcloud_url=nextcloud_url, nc_auth_user=".adf", nc_auth_pass="sknf")
-                        nc_instance.capabilities
-                        load_mandate(self.nc_mandatefilepath, nc_loading=True, nc_instance=nc_instance)
-
-                    if not self.nc_auth_user:
-                        self.loginprompt = LoginPrompt(try_logging_in_f, title="Nextcloud Login")
-                        self.loginprompt.show()
-                    else: load_mandate(self.nc_mandatefilepath, nc_loading=True,nc_instance = Nextcloud(nextcloud_url=self.nc_url, nc_auth_user=self.nc_auth_user,
-                                                nc_auth_pass=self.nc_auth_pass))
-                else:
-                    filepath = load_filepath(self,"Lade Daten von SEPA Mandate")
-                    load_mandate(filepath)
+                filepath = load_filepath(self,"Lade Daten von SEPA Mandate")
+                load_mandate(filepath)
             else:
                 load_mandate(filepath)
 
@@ -350,7 +271,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     print(self.invoices.data["list"].loc[selected_names])
                     invoices_selected_names = self.invoices.data["list"].loc[selected_names]
 
-                    exportingdebit,exportingtransfer, missingmandates,doublesprocess = produce_sepa_export_dfs(invoices_selected_names,self.mandates,self.creditor_ID)
+                    exportingdebit,exportingtransfer, missingmandates,doublesprocess = produce_sepa_export_dfs(invoices_selected_names,self.mandates,self.mandates.data["Creditor ID"])
                     if doublesprocess["Name"]:
                         print("we merged doubes")
                         dlg = QMessageBox(self)
@@ -376,32 +297,33 @@ class MainWindow(QtWidgets.QMainWindow):
                             return
 
                     print(f"df = {exportingdebit,exportingtransfer}")
-                    filepath1 = load_filepath(self,"Wähle Speicherort für Export für SEPA Lastschrift aus", filter="csv (*.csv)", fileex=False)
-                    if filepath1 is not None:
-                        if ".csv" not in filepath1:
-                            filepath1 = f"{filepath1}.csv"
-                        print(f"Export to: {filepath1}")
-                        try:
-                            exportingdebit.to_csv(filepath1, index=False,sep=";")
-                        except:
-                            errorbox = QMessageBox("Saving didnot work")
-                            print("savning didnot work")
-                    else: return
+                    if exportingdebit is not  None:
+                        filepath1 = load_filepath(self,"Wähle Speicherort für Export für SEPA Lastschrift aus", filter="csv (*.csv)", fileex=False)
+                        if filepath1 is not None:
+                            if ".csv" not in filepath1:
+                                filepath1 = f"{filepath1}.csv"
+                            print(f"Export to: {filepath1}")
+                            try:
+                                exportingdebit.to_csv(filepath1, index=False,sep=";")
+                            except:
+                                errorbox = QMessageBox("Saving didnot work")
+                                print("savning didnot work")
+                        else: return
+                    if exportingtransfer is not  None:
+                        filepath2 = load_filepath(self,"Wähle Speicherort für Export für Überweisungen aus",
+                                                  filter="csv (*.csv)", fileex=False)
 
-                    filepath2 = load_filepath(self,"Wähle Speicherort für Export für Überweisungen aus",
-                                              filter="csv (*.csv)", fileex=False)
-
-                    if filepath2 is not None:
-                        if ".csv" not in filepath2:
-                            filepath2 = f"{filepath2}.csv"
-                        print(f"Export to: {filepath2}")
-                        try:
-                            exportingtransfer.to_csv(filepath2, index=False,sep=";")
-                        except:
-                            errorbox = QMessageBox("Saving didnot work")
-                            print("savning didnot work")
-                    else:
-                        return
+                        if filepath2 is not None:
+                            if ".csv" not in filepath2:
+                                filepath2 = f"{filepath2}.csv"
+                            print(f"Export to: {filepath2}")
+                            try:
+                                exportingtransfer.to_csv(filepath2, index=False,sep=";")
+                            except:
+                                errorbox = QMessageBox("Saving didnot work")
+                                print("savning didnot work")
+                        else:
+                            return
                     self.exportwindow.close()
                     return selected_names
 
@@ -439,125 +361,6 @@ class MainWindow(QtWidgets.QMainWindow):
                             ["Lade Daten von SEPA Mandate", "", import_mandates],
                             ["Exportiere .csv Datei für Raiffeisen Infinty", "", export_csv]]
         return menubardata
-
-    def init_menubardata_new_member(self):
-        def load_Mail():
-            print("Load Mail")
-
-            def selectmail(imap):
-                print("Select mail out of list")
-                self.mailselectionprompt = MailSelection("Select the Mail",imap=imap,functiononnewmemberparse=self.new_member.load_data)
-                self.mailselectionprompt.show()
-
-            def try_logging_in_f(user, pw):
-                print(f"try logging in IMAP server: {user} und pw: {pw}")
-                imap = imaplib.IMAP4_SSL(self.imap_server)
-                # # authenticate
-                imap.login(user, pw)
-                selectmail(imap)
-
-            # self.loginprompt = LoginPrompt(try_logging_in_f,title = "Email Login")
-            # self.loginprompt.show()
-            try_logging_in_f( "info@gemeinwohlenergie-innsbruck.at", "MnAE4SssEvb4Dm")
-
-        def show_new_member():
-            print(self.new_member.data)
-
-        def load_faktura_new_member_export_template():
-            def load_faktura_template(filepath, nc_loading=False, nc_instance=""):
-                if filepath is not None:
-                    new_memberdata = self.new_member.load_template(filepath=filepath, nc=nc_loading, nc_instance=nc_instance)
-                    if new_memberdata is not None:
-                        self.loaded_filepaths.loc[self.loaded_filepaths["Daten"][
-                            self.loaded_filepaths["Daten"] == "Vorlage EEG Faktura Stammdaten Import"].index, "Speicherort"] = filepath
-                        self.new_membersdata_loaded = True
-                        self.table_1_1.set_new_data(self.loaded_filepaths.iloc[0:3])
-                else:
-                    return None
-            # filepath = "/home/leander/gei/export_infinity/lastschriftmandate.xlsx"
-            filepath=""
-            if not filepath:
-                print("Load faktura_new_member_export_template")
-                dlg = QMessageBox(self)
-                questiontext = f"Ich kann die die Vorlage zu Faktura Export von folgendem Pfad herunteladen:"
-                questiontext += f"\n\n{self.nc_faktura_export_template_fp}"
-                questiontext += "\n\nSoll ich es von diesem Pfad herunterladen, oder willst du lokal eine Datei von deinem Computer auswählen?"
-                dlg.setText(questiontext)
-                dlg.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
-                prompt = dlg.exec()
-
-
-                if prompt == QMessageBox.Yes:
-                    def try_logging_in_f(user,pw):
-                        print(f"try logging in nextcloud with user: {user} und pw: {pw}")
-                        # nextcloud_url = 'https://cloud.gemeinwohlenergie-innsbruck.at'
-                        nc_instance = Nextcloud(nextcloud_url=self.nc_url, nc_auth_user=user,
-                                                nc_auth_pass=pw)
-                        # self.nc_instance = Nextcloud(nextcloud_url=nextcloud_url, nc_auth_user=".adf", nc_auth_pass="sknf")
-                        nc_instance.capabilities
-                        self.nc_auth_user = user
-                        self.nc_auth_pass = pw
-                        load_faktura_template(self.nc_faktura_export_template_fp, nc_loading=True, nc_instance=nc_instance)
-                    if not self.nc_auth_user:
-                        self.loginprompt = LoginPrompt(try_logging_in_f, title="Nextcloud Login")
-                        self.loginprompt.show()
-                else:
-                    filepath = load_filepath(self,"Lade Vorlage zu Faktura Export")
-                    load_faktura_template(filepath = filepath)
-            else:
-                load_faktura_template(filepath = filepath)
-
-        def export_for_faktura():
-            print("Faktura Export")
-            ws = newmember.template_for_export["EEG Stammdaten"]
-            matchingdict = {
-
-                "Postleitzahl":"D10",
-                "Stadt/Ort":"E10",
-                "Straße":"F10",
-                "Hausnummer":"G10",
-                "Vorname":"U10",
-                "Nachname":"V10",
-                "IBAN":"Z10",
-                "Name auf Bankkarte":"AA10",
-                "E-Mail":"AC10",
-                "phone":"AD10",
-
-
-
-
-            }
-            for match in matchingdict:
-                ws[matchingdict[match]] = self.new_member.data[match]
-            if self.new_member.data["Anmeldungstyp"] == "Produzent:in":
-                ws["L10"] = self.new_member.data['Einspeisezählpunkt-nummer']
-                ws["M10"] = "PRODUCTION"    #????
-                netzbetreibernummer = self.new_member.data['Einspeisezählpunkt-nummer'][0:8]
-                ws["A10"] = netzbetreibernummer
-            elif self.new_member.data["Anmeldungstyp"] == "Konsument:in":
-                ws["L10"] = self.new_member.data['Zählpunktnummer']
-                netzbetreibernummer = self.new_member.data['Zählpunktnummer'][0:8]
-                ws["A10"] = netzbetreibernummer
-                ws["M10"] = "CONSUMPTION"
-            if self.new_member.data["Ich bin"] == "Privatperson":
-                ws["X10"] = "privat"
-            else:
-                ws["X10"] = self.new_member.data["bussines"]
-                ws["AF10"] = "USt. Nummer"
-
-            ws["Y10"] = dt.datetime.today().strftime("%d.%m.%Y")
-            ws["AI10"] =  dt.datetime.today().strftime("%d.%m.%Y")
-            ws["B10"] = self.GEI_gemeinschafts_ID
-
-            filepath = load_filepath(self,"Exportiere Daten von einem neunen Mitglied für EEG Faktura als .xlsx",fileex=False)
-            if filepath is not None:
-                if ".xlsx" not in filepath:
-                    filepath = f"{filepath}.xlsx"
-                    newmember.template_for_export.save(filepath)
-        menubardata = [["Wähle eine Mail aus", "", load_Mail],["Zeige die Daten vom neuen Mitglied", "", show_new_member],
-                       ["Lade Vorlage zu Faktura Export", "", load_faktura_new_member_export_template],["Exportiere Daten vom neuen Mitglied für EEG Faktura", "", export_for_faktura]]
-        return menubardata
-
 
 
 def main():

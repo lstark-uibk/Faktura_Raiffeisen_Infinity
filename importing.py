@@ -1,5 +1,7 @@
 from tempfile import template
 import datetime as dt
+from xxlimited_35 import error
+
 import pandas as pd
 from PyQt5.QtWidgets import QFileDialog, QMessageBox
 from io import BytesIO
@@ -27,21 +29,20 @@ def load_mandates(filepath='',nc =False, nc_instance = ''):
     if not nc:
         try:
             mandates = pd.read_excel(filepath)
-        except:
+        except error as Error:
+            print(Error)
             errorbox = QMessageBox()
-            errorbox.setText("Ausgewählte Date ist nicht lesbar (ist sie im richtigen Format?)")
+            errorbox.setText("Ausgewählte Datei ist nicht lesbar (ist sie im richtigen Format?)")
             errorbox.exec_()
             return
     else:
-        print("Nextcloud loading")
-        mandates = nc_instance.files.download(filepath)
-        mandates = pd.read_excel(BytesIO(mandates), engine='openpyxl')
-        print(mandates)
+        pass
+
     try:
         mandates = mandates[~mandates['Mandatsausstellungsdatum (Datum auf dem Vertrag)'].isna()]
         mandates['Mandatsausstellungsdatum'] = pd.to_datetime(mandates['Mandatsausstellungsdatum (Datum auf dem Vertrag)'],dayfirst=True)
         mandates = mandates.drop('Mandatsausstellungsdatum (Datum auf dem Vertrag)', axis=1)
-        mandates = mandates.rename(columns={'Vorname (gleich wie in eegfaktura)': 'Vorname', 'Nachname (gleich wie in eegfaktura)': 'Nachname','Mitgliedsnummer aus eegfaktura ist auch die Mandatsreferenz':'Mitgliedsnummer'})
+        mandates = mandates.rename(columns={'Vorname (gleich wie in eegfaktura)': 'Vorname', 'Nachname (gleich wie in eegfaktura)': 'Nachname'})
     except:
         errorbox = QMessageBox()
         errorbox.setText("Ausgewählte Date ist nicht lesbar (ist sie im richtigen Format?)")
@@ -126,13 +127,5 @@ invoices = Data(load_invoices,load_invoice_template)
 emails = Data(load_mail_adresses,load_mail_template)
 newmember = Data(load_new_member_data,load_faktura_member_export_template)
 
-template_debit = "/home/leander/gei/faktura/pythonProject/data/Musterdatei Import Lastschriften.csv"
-template_transfer = "/home/leander/gei/faktura/pythonProject/data/Musterdatei Import Überweisungen.csv"
-datamandate = "/home/leander/gei/export_infinity/lastschriftmandate.xlsx"
-datainvoices = "/home/leander/gei/faktura/pythonProject/data/CC100438_abrechnung_final.xlsx"
-fakturaexport = "/home/leander/gei/faktura/stammdaten_import/241206-vorlage-import-stammdaten_ls.xlsx"
 
-# mandates.load_template(template_debit,template_transfer)
-# mandates.load_data(datamandate)
-# invoices.load_data(datainvoices)
-newmember.load_template(filepath = fakturaexport)
+
