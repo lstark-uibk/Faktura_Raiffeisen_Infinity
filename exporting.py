@@ -1,18 +1,6 @@
-from pathlib import Path
-import os
 import pandas as pd
 import datetime as dt
-# from docxtpl import DocxTemplate
-# import openpyxl
-# from docx.enum.table import WD_TABLE_ALIGNMENT
-# from docx import Document
-# from docx.shared import Cm
-# import numpy as np
-# from datetime import date
-# import datetime as dt
-# from PyInquirer import prompt
-# import pprint
-# import tkinter as tk
+
 
 def produce_sepa_export_dfs(invoices_selected_persons,mandates,creditor_ID):
     debit = invoices_selected_persons[(invoices_selected_persons["Dokumenttyp"] == "Rechnung")]
