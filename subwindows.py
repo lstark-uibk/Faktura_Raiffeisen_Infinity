@@ -1,12 +1,4 @@
 import PyQt5.QtWidgets as QtWidgets
-import PyQt5.QtGui as QtGui
-from matplotlib.pyplot import title
-from bs4 import BeautifulSoup
-
-from nc_py_api import Nextcloud
-import imaplib
-import email
-from email.header import decode_header
 from PyQt5.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton, QListWidget, QTextEdit, QFormLayout, QScrollArea
 import sys
 

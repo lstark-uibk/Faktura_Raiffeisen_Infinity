@@ -1,11 +1,5 @@
-from tempfile import template
-import datetime as dt
-from xxlimited_35 import error
-
 import pandas as pd
 from PyQt5.QtWidgets import QFileDialog, QMessageBox
-from io import BytesIO
-from openpyxl import load_workbook
 
 
 # mandate =pd.read_excel("/home/leander/gei/faktura/abrechnung_24_q3/CC100438_abrechnung_Abr_YQ-2024-3_export(1).xlsx",sheet_name="Liste")
@@ -90,24 +84,6 @@ def load_mail_template(filepath):
     print(filepath)
 def load_new_member_data(data= []):
     return data
-
-def load_faktura_member_export_template(filepath = "",nc =False, nc_instance = ''):
-    print(f"Load {filepath}")
-    if not nc:
-        try:
-            template = load_workbook(filename = filepath)
-            print(template)
-        except:
-            errorbox = QMessageBox()
-            errorbox.setText("Ausgewählte Date ist nicht lesbar (ist sie im richtigen Format?)")
-            errorbox.exec_()
-            return
-    else:
-        print("Nextcloud loading")
-        template = nc_instance.files.download(filepath)
-        template = load_workbook(BytesIO(template))
-        print(template)
-    return template
 
 
 def load_filepath(parent, title, filter="Excel (*.xlsx)", fileex=True, homedir = ""):
