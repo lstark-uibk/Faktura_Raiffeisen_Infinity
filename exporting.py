@@ -115,7 +115,7 @@ def produce_sepa_export_dfs(invoices_selected_persons,mandates,creditor_ID):
 
     serieslist = []
     for index, line in transfer.iterrows():
-        exportline = create_one_line_debit(line,creditor_ID,mandates,type="transfer")
+        exportline = create_one_line_debit(line,mandates,type="transfer")
         if exportline is not None:
             serieslist.append(exportline)
     if len(serieslist) > 1:

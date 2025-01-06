@@ -101,7 +101,6 @@ def load_filepath(parent, title, filter="Excel (*.xlsx)", fileex=True, homedir =
 mandates = Data(load_mandates,load_mandate_template)
 invoices = Data(load_invoices,load_invoice_template)
 emails = Data(load_mail_adresses,load_mail_template)
-newmember = Data(load_new_member_data,load_faktura_member_export_template)
 
 
 

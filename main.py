@@ -4,7 +4,7 @@ from subwindows import Subwindow
 from PyQt5 import QtWidgets, QtGui, QtCore
 import sys
 from PyQt5.QtWidgets import QLabel, QFileDialog, QMessageBox, QGridLayout, QTableWidget, QTableWidgetItem, QListWidget, QWidget, QListWidgetItem, QCheckBox, QListWidgetItem, QPushButton, QVBoxLayout
-from importing import mandates,invoices,emails, newmember, load_filepath
+from importing import mandates,invoices,emails, load_filepath
 from exporting import produce_sepa_export_dfs
 from PyQt5.QtWidgets import QHBoxLayout
 
@@ -124,8 +124,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.mandates = mandates
         self.invoices = invoices
         self.emails = emails
-        self.new_member = newmember
-    
+
     def init_menubardata_mandates(self):
 
         def updatetable_1_1():
@@ -277,7 +276,7 @@ class MainWindow(QtWidgets.QMainWindow):
                         dlg = QMessageBox(self)
                         questiontext = f"Für folgende Personen gibt es sowohl Überweisungsdaten und Lastschriftdaten. Diese werden zusammengeführt:\n\n"
                         for i in range(0,len(doublesprocess["Name"])):
-                            questiontext += f"{doublesprocess["Name"][i]}: Lastschrift: {doublesprocess["Debit"][i]}€, Überweisung: {doublesprocess["Transfer"][i]}€ --> {doublesprocess["Type"][i]} mit {doublesprocess["Final"][i]}€ \n"
+                            questiontext += f"{doublesprocess['Name'][i]}: Lastschrift: {doublesprocess['Debit'][i]}€, Überweisung: {doublesprocess['Transfer'][i]}€ --> {doublesprocess['Type'][i]} mit {doublesprocess['Final'][i]}€ \n"
                         dlg.setText(questiontext)
                         prompt = dlg.exec()
 
