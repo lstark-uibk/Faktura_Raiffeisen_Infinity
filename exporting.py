@@ -107,10 +107,8 @@ def produce_sepa_export_dfs(invoices_selected_persons,mandates,creditor_ID):
             serieslist.append(exportline)
             if not matchingmandate:
                 missingmandates.append(f"{line['Empfänger Vorame']} {line['Empfänger Nachname']}")
-    if len(serieslist) > 1:
+    if len(serieslist) >= 1:
         debitexport = pd.concat(serieslist, axis=1).T
-    elif len(serieslist) == 1:
-        debitexport = serieslist[0].to_frame()
     else: debitexport = None
 
     serieslist = []
@@ -118,10 +116,8 @@ def produce_sepa_export_dfs(invoices_selected_persons,mandates,creditor_ID):
         exportline = create_one_line_debit(line,mandates,type="transfer")
         if exportline is not None:
             serieslist.append(exportline)
-    if len(serieslist) > 1:
+    if len(serieslist) >= 1:
         transferexport = pd.concat(serieslist, axis=1).T
-    elif len(serieslist) == 1:
-        transferexport = serieslist[0].to_frame()
     else: transferexport = None
     return debitexport,transferexport, missingmandates, doublesprocess
 

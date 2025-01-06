@@ -272,7 +272,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
                     exportingdebit,exportingtransfer, missingmandates,doublesprocess = produce_sepa_export_dfs(invoices_selected_names,self.mandates,self.mandates.data["Creditor ID"])
                     if doublesprocess["Name"]:
-                        print("we merged doubes")
+                        print("we merged doubles")
                         dlg = QMessageBox(self)
                         questiontext = f"Für folgende Personen gibt es sowohl Überweisungsdaten und Lastschriftdaten. Diese werden zusammengeführt:\n\n"
                         for i in range(0,len(doublesprocess["Name"])):
@@ -306,7 +306,7 @@ class MainWindow(QtWidgets.QMainWindow):
                                 exportingdebit.to_csv(filepath1, index=False,sep=";")
                             except:
                                 errorbox = QMessageBox("Saving didnot work")
-                                print("savning didnot work")
+                                print("saving didnot work")
                         else: return
                     if exportingtransfer is not  None:
                         filepath2 = load_filepath(self,"Wähle Speicherort für Export für Überweisungen aus",
