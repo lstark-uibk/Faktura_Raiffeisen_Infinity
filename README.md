@@ -1,5 +1,7 @@
 Kleines Programm um exportierte EEG Faktura Daten zum Import auf Raiffeisen Infintiy vorzubreiten.
 
+Anleitung hier zu finden: https://youtu.be/NeCqSaNAQ-M
+
 Getestet auf Python 3.12
 Braucht: pandas, PyQt5
 
