@@ -1,4 +1,3 @@
-from nc_py_api import Nextcloud
 import pandas as pd
 from subwindows import Subwindow
 from PyQt5 import QtWidgets, QtGui, QtCore
